@@ -80,13 +80,8 @@ function self_sign_client {
 	$OPENSSL x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt -passin pass:$PASSPHRASE
 }
 
-function combine_client_certs { 
-	$OPENSSL pkcs12 -export -clcerts -in client.crt -inkey client.key -out client.p12
-}
-
 ca_key_cert
 server_key_cert
 self_sign_server
 client_certs
 self_sign_client
-#combine_client_certs

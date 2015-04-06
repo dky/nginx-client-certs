@@ -53,7 +53,7 @@ function server_key_cert {
 	CN_NAME="www.dky.io"
 
 	echo "Creating $NAME key"
-	$OPENSSL genrsa -des3 -passout pass:$PASSPHRASE -out $NAME.key 1024
+	$OPENSSL genrsa -des3 -passout pass:$PASSPHRASE -out $NAME.key 2048
 	gen_config "$NAME" "$BITS" "$PASSPHRASE" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
 	echo "Creating $NAME.csr"
 	$OPENSSL req -new -key $NAME.key -out $NAME.csr -config $NAME.conf 
@@ -69,7 +69,7 @@ function client_certs {
 	CN_NAME="$NAME.$OU"
 
 	echo "Creating $NAME key"
-	$OPENSSL genrsa -des3 -passout pass:$PASSPHRASE -out $NAME.key 1024
+	$OPENSSL genrsa -des3 -passout pass:$PASSPHRASE -out $NAME.key 2048
 	gen_config "$NAME" "$BITS" "$PASSPHRASE" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
 	echo "Creating $NAME.csr"
 	$OPENSSL req -new -key $NAME.key -out $NAME.csr -config $NAME.conf 

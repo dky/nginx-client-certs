@@ -1,8 +1,8 @@
-#CSR Generate 
+# CSR Generate 
 
 Shell script to automate generating CA certs, Server certs, and Client Certs for certificate based auth. This script was generated when I needed to setup certificate bashed auth using Nginx and got sick of manually running the openssl command to generate each set of certs.
 
-##Usage:
+## Usage:
 
 Shell script contains 6 functions, functionality of each function is broke out below:
 
@@ -15,9 +15,9 @@ Shell script contains 6 functions, functionality of each function is broke out b
 - self_sign_client - Sign the client cert with our CA cert 
 - combine_client_certs - Combine the client cert and key into a .p12 file. We can then import this into OSX keychain. 
 
-##To customize:
+## Customization:
 
-###Replace global the variables:
+### Replace global the variables:
 
 ```
 BITS=2048

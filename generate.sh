@@ -6,12 +6,11 @@ function gen_config () {
 
 CONF_NAME=$1
 BITS=$2
-PASS=$3
-COUNTRY_NAME=$4
-LOCATION_NAME=$5
-OU_NAME=$6
-CN_NAME=$7
-EMAIL=$8
+COUNTRY_NAME=$3
+LOCATION_NAME=$4
+OU_NAME=$5
+CN_NAME=$6
+EMAIL=$7
 
 cat << EOF > ./$CONF_NAME.conf
 [req]
@@ -36,7 +35,6 @@ EOF
 }
 
 BITS=4096
-PASSPHRASE="selfsigned"
 COUNTRY="US"
 LOCATION="NY"
 OU="dky.io"
@@ -48,8 +46,8 @@ make_ca() {
 	CN_NAME="$NAME.$OU"
 
 	echo "Generating ca config"
-	gen_config "$NAME" "$BITS" "$PASSPHRASE" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
-	# 3652 = 10 years
+	gen_config "$NAME" "$BITS" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
+
 	$OPENSSL req -new -nodes -x509 -keyout ca.key -out ca.crt -config $NAME.conf -extensions v3_req -days 3652
 }
 
@@ -59,8 +57,9 @@ make_int() {
 	CN_NAME="$NAME.$OU"
 
 	echo "Generating int config"
-	gen_config "$NAME" "$BITS" "$PASSPHRASE" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
-	# 3652 = 10 years
+	gen_config "$NAME" "$BITS" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
+
+	echo "write key"
 	$OPENSSL req -new -keyout $NAME.key -out $NAME.csr -config $NAME.conf -extensions v3_req -days 3652
 	$OPENSSL req -in $NAME.csr -noout -verify
 
@@ -71,42 +70,37 @@ make_int() {
 	cat ca_int.crt ca.crt > ca.pem
 }
 
-
-server_cert() {
+make_server() {
 	NAME=server
 	CN_NAME="www.dky.io"
 
 	echo "Creating $NAME key"
-	$OPENSSL genrsa -des3 -passout pass:$PASSPHRASE -out $NAME.key 2048
-	gen_config "$NAME" "$BITS" "$PASSPHRASE" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
+	gen_config "$NAME" "$BITS" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
 	echo "Creating $NAME.csr"
-	$OPENSSL req -new -key $NAME.key -out $NAME.csr -config $NAME.conf 
+	$OPENSSL req -new -nodes -keyout $NAME.key -out $NAME.csr -config $NAME.conf
+	$OPENSSL req -in $NAME.csr -noout -verify
+
+	$OPENSSL x509 -req -CA ca_int.crt -CAkey ca_int.key -CAcreateserial -in $NAME.csr -out $NAME.crt -extfile $NAME.conf -extensions v3_req -days 3652
+	$OPENSSL verify -CAfile ca.pem server.crt
 }
 
-function self_sign_server {
-	#self sign the server cert using our own CA
-	$OPENSSL x509 -req -days 365 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt -passin pass:$PASSPHRASE
-}
-
-function client_certs {
+make_client() {
 	NAME=client
 	CN_NAME="$NAME.$OU"
 
 	echo "Creating $NAME key"
-	$OPENSSL genrsa -des3 -passout pass:$PASSPHRASE -out $NAME.key 2048
-	gen_config "$NAME" "$BITS" "$PASSPHRASE" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
+	gen_config "$NAME" "$BITS" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
 	echo "Creating $NAME.csr"
-	$OPENSSL req -new -key $NAME.key -out $NAME.csr -config $NAME.conf 
-}
+	$OPENSSL req -new -nodes -keyout $NAME.key -out $NAME.csr -config $NAME.conf
 
-function self_sign_client {
-	#Sign the client certificate with our CA cert.  Unlike signing our own server cert, this is what we want to do.
-	$OPENSSL x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt -passin pass:$PASSPHRASE
+	$OPENSSL req -in $NAME.csr -noout -verify
+
+	$OPENSSL x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in $NAME.csr -out $NAME.crt -extfile $NAME.conf -extensions v3_req -days 3652
+
+	$OPENSSL verify -CAfile ca.pem $NAME.crt
 }
 
 make_ca
 make_int
-#server_key_cert
-#self_sign_server
-#client_certs
-#self_sign_client
+make_server
+make_client

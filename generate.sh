@@ -18,7 +18,6 @@ default_bits = $BITS
 distinguished_name = distinguished_name
 prompt = no
 default_md = sha256
-default_keyfile = $CONF_NAME.key
 req_extensions = v3_req
 
 [distinguished_name]

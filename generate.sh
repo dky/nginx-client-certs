@@ -14,38 +14,45 @@ CN_NAME=$7
 EMAIL=$8
 
 cat << EOF > ./$CONF_NAME.conf
-[ req ]
+[req]
 default_bits = $BITS
-default_keyfile = $CONF_NAME.key
 distinguished_name = distinguished_name
 prompt = no
-input_password = $PASSPHRASE
+default_md = sha256
+default_keyfile = $CONF_NAME.key
+req_extensions = v3_req
 
-[ distinguished_name ]
+[distinguished_name]
+
+[distinguished_name]
 C = $COUNTRY_NAME
 L = $LOCATION_NAME
 O = $OU_NAME
 CN = $CN_NAME
-emailAddress = $EMAIL
+
+[v3_req]
+basicConstraints = critical, CA:true
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
 EOF
 }
 
-BITS=2048
+BITS=4096
 PASSPHRASE="selfsigned"
 COUNTRY="US"
 LOCATION="NY"
 OU="dky.io"
 EMAIL="support@dky.io"
 
-function ca_key_cert {
+function make_ca {
+	echo "Generating Self-Signed Root CA and key"
 	NAME=ca
 	CN_NAME="$NAME.$OU"
 
-	echo "Creating $NAME.key"
-	$OPENSSL genrsa -des3 -passout pass:$PASSPHRASE -out $NAME.key 4096
+	echo "Generating ca config"
 	gen_config "$NAME" "$BITS" "$PASSPHRASE" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
-	echo "Creating $NAME.crt"
-	$OPENSSL req -new -x509 -days 365 -key $NAME.key -out $NAME.crt -config $NAME.conf
+	# 3652 = 10 years
+	$OPENSSL req -new -nodes -x509 -keyout ca.key -out ca.crt -config $NAME.conf -extensions v3_req -days 3652
 }
 
 function server_key_cert {
@@ -80,8 +87,8 @@ function self_sign_client {
 	$OPENSSL x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt -passin pass:$PASSPHRASE
 }
 
-ca_key_cert
-server_key_cert
-self_sign_server
-client_certs
-self_sign_client
+make_ca
+#server_key_cert
+#self_sign_server
+#client_certs
+#self_sign_client

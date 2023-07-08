@@ -16,15 +16,24 @@ case $CONF_NAME in
 	X509='x509_extensions = v3_req'
 	KEY_USAGE='nonRepudiation, digitalSignature, keyEncipherment, keyAgreement'
 	EXTEND_KEY_USAGE='extendedKeyUsage = critical, serverAuth'
+	BASIC_CONSTRAINTS='CA:FALSE'
+	SUBJECT_KEY_IDENTIFIER=''
 	;;
 	client)
 	BITS=2048
 	KEY_USAGE='nonRepudiation, digitalSignature, keyEncipherment, keyAgreement'
 	;;
-	*)
+	ca)
 	BITS=4096
 	BASIC_CONSTRAINTS='critical, CA:true'
 	KEY_USAGE='critical, keyCertSign, cRLSign'
+	SUBJECT_KEY_IDENTIFIER='subjectKeyIdentifier = hash'
+	;;
+	ca_int)
+	BITS=4096
+	BASIC_CONSTRAINTS='critical, CA:true'
+	KEY_USAGE='critical, keyCertSign, cRLSign'
+	SUBJECT_KEY_IDENTIFIER='subjectKeyIdentifier = hash'
 	;;
 
 esac
@@ -48,7 +57,8 @@ CN = $CN_NAME
 [v3_req]
 basicConstraints = $BASIC_CONSTRAINTS
 keyUsage = $KEY_USAGE
-subjectKeyIdentifier = hash
+$SUBJECT_KEY_IDENTIFIER
+$EXTEND_KEY_USAGE
 EOF
 }
 
@@ -119,5 +129,5 @@ make_client() {
 
 make_ca
 make_int
-#make_server
-#make_client
+make_server
+make_client

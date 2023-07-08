@@ -23,8 +23,6 @@ default_keyfile = $CONF_NAME.key
 req_extensions = v3_req
 
 [distinguished_name]
-
-[distinguished_name]
 C = $COUNTRY_NAME
 L = $LOCATION_NAME
 O = $OU_NAME
@@ -44,7 +42,7 @@ LOCATION="NY"
 OU="dky.io"
 EMAIL="support@dky.io"
 
-function make_ca {
+make_ca() {
 	echo "Generating Self-Signed Root CA and key"
 	NAME=ca
 	CN_NAME="$NAME.$OU"
@@ -55,7 +53,26 @@ function make_ca {
 	$OPENSSL req -new -nodes -x509 -keyout ca.key -out ca.crt -config $NAME.conf -extensions v3_req -days 3652
 }
 
-function server_key_cert {
+make_int() {
+	echo "Generating Intermediate CA and key"
+	NAME=ca_int
+	CN_NAME="$NAME.$OU"
+
+	echo "Generating int config"
+	gen_config "$NAME" "$BITS" "$PASSPHRASE" "$COUNTRY" "$LOCATION" "$OU" "$CN_NAME" "$EMAIL"
+	# 3652 = 10 years
+	$OPENSSL req -new -keyout $NAME.key -out $NAME.csr -config $NAME.conf -extensions v3_req -days 3652
+	$OPENSSL req -in $NAME.csr -noout -verify
+
+	$OPENSSL x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in $NAME.csr -out $NAME.crt -extfile $NAME.conf -extensions v3_req -days 3652
+	$OPENSSL verify -CAfile ca.crt ca_int.crt
+
+	echo "Creating CA chain/bundle"
+	cat ca_int.crt ca.crt > ca.pem
+}
+
+
+server_cert() {
 	NAME=server
 	CN_NAME="www.dky.io"
 
@@ -88,6 +105,7 @@ function self_sign_client {
 }
 
 make_ca
+make_int
 #server_key_cert
 #self_sign_server
 #client_certs

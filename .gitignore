@@ -3,3 +3,5 @@
 *.crt
 *.conf
 *.p12
+*.pem
+*.srl

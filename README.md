@@ -1,18 +1,14 @@
 # CSR Generate 
 
-Automate generating CA certs, Server certs, and Client Certs for certificate based auth. 
-
-This script was generated when I needed to setup certificate based auth using Nginx and got sick of manually running the openssl command to generate each set of certs.
-
+Automate generating CA certs, Server certs, and Client Certs for certificate based auth. These certs were used with Nginx client based authentication.
 ## Usage:
 
-Shell script contains 6 functions, functionality of each function is broke out below:
+`generate.sh` will only create a `CA` cert used to sign a client cert used for cert based auth. The cert will last for 10 years.
+If you need intermediate certs and server certs un-comment `make_int` and `make_server` which will then generate the server certs and intermediate certs.
 
 ```
 ./generate.sh
 ```
-
-You'll get prompted a few times to enter the passprhase for the intermediate ca key. Make sure to remmeber this and repeat it.
 
 ## Customization:
 
@@ -28,3 +24,20 @@ EMAIL="support@dky.io"
 With your own variables. 
 
 You'll likely want to also modify the `CN_NAME` variable within the server_key_cert function. 
+
+## Nginx installation
+
+1. Copy `ca.crt` to the remote target.
+2. Configure Nginx:
+
+```
+ssl_client_certificate /etc/nginx/ca.crt;
+ssl_verify_client on;
+```
+
+3. If you need a `.pfx` file we have a helper script `combine.sh` that will generate a pfx file you can import into a keychain.
+
+
+## Troubleshooting
+
+`validate.sh` makes a curl call to the protected endpoint providing the client cert, key and the ca.crt. Use this to make sure certs are functional.

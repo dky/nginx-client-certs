@@ -27,15 +27,16 @@ You'll likely want to also modify the `CN_NAME` variable within the server_key_c
 
 ## Nginx installation
 
-1. Copy `ca.crt` to the remote target.
-2. Configure Nginx:
+1. Run `./generate.sh` This should generate both the CA cert + the Client cert.
+2. Copy `ca.crt` to the remote target.
+3. Configure Nginx:
 
 ```
 ssl_client_certificate /etc/nginx/ca.crt;
 ssl_verify_client on;
 ```
 
-3. If you need a `.pfx` file we have a helper script `combine.sh` that will generate a pfx file you can import into a keychain.
+4. If you need a `.pfx` file we have a helper script `combine.sh` that will generate a pfx file you can import into a keychain.
 
 
 ## Troubleshooting

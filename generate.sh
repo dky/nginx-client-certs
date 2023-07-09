@@ -12,17 +12,6 @@ CN_NAME=$5
 EMAIL=$6
 
 case $CONF_NAME in
-	server)
-	X509='x509_extensions = v3_req'
-	KEY_USAGE='nonRepudiation, digitalSignature, keyEncipherment, keyAgreement'
-	EXTEND_KEY_USAGE='extendedKeyUsage = critical, serverAuth'
-	BASIC_CONSTRAINTS='CA:FALSE'
-	SUBJECT_KEY_IDENTIFIER=''
-	;;
-	client)
-	BITS=2048
-	KEY_USAGE='nonRepudiation, digitalSignature, keyEncipherment, keyAgreement'
-	;;
 	ca)
 	BITS=4096
 	BASIC_CONSTRAINTS='critical, CA:true'
@@ -35,7 +24,20 @@ case $CONF_NAME in
 	KEY_USAGE='critical, keyCertSign, cRLSign'
 	SUBJECT_KEY_IDENTIFIER='subjectKeyIdentifier = hash'
 	;;
-
+	server)
+	X509='x509_extensions = v3_req'
+	KEY_USAGE='nonRepudiation, digitalSignature, keyEncipherment, keyAgreement'
+	EXTEND_KEY_USAGE='extendedKeyUsage = critical, serverAuth'
+	BASIC_CONSTRAINTS='CA:FALSE'
+	SUBJECT_KEY_IDENTIFIER=''
+	;;
+	client)
+	BITS=2048
+	KEY_USAGE='nonRepudiation, digitalSignature, keyEncipherment, keyAgreement'
+	EXTEND_KEY_USAGE='extendedKeyUsage = critical, clientAuth'
+	BASIC_CONSTRAINTS='CA:FALSE'
+	SUBJECT_KEY_IDENTIFIER=''
+	;;
 esac
 
 echo "Using $BITS"

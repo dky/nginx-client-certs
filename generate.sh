@@ -125,7 +125,7 @@ make_client() {
 
 	$OPENSSL x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in $NAME.csr -out $NAME.crt -extfile $NAME.conf -extensions v3_req -days 3652
 
-	$OPENSSL verify -CAfile ca.pem $NAME.crt
+	$OPENSSL verify -CAfile ca.crt $NAME.crt
 }
 
 make_ca

@@ -42,3 +42,10 @@ ssl_verify_client on;
 ## Troubleshooting
 
 `validate.sh` makes a curl call to the protected endpoint providing the client cert, key and the ca.crt. Use this to make sure certs are functional.
+
+Validate the `client.crt` contains SSL client
+
+```
+$ openssl x509 -in client.crt -noout -purpose | grep 'SSL client :'
+SSL client : Yes
+```

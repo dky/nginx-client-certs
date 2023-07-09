@@ -97,6 +97,7 @@ make_int() {
 	cat ca_int.crt ca.crt > ca.pem
 }
 
+# Uneeded if you only want to use client auth
 make_server() {
 	NAME=server
 	CN_NAME="www.dky.io"
@@ -128,6 +129,6 @@ make_client() {
 }
 
 make_ca
-make_int
-make_server
+#make_int
+#make_server
 make_client

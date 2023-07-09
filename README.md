@@ -36,14 +36,14 @@ ssl_client_certificate /etc/nginx/ca.crt;
 ssl_verify_client on;
 ```
 
-4. If you need a `.pfx` file we have a helper script `combine.sh` that will generate a pfx file you can import into a keychain.
+4. If you need a `.p12` we have a helper script `create_p12.sh`.
 
 
 ## Troubleshooting
 
 `validate.sh` makes a curl call to the protected endpoint providing the client cert, key and the ca.crt. Use this to make sure certs are functional.
 
-Validate the `client.crt` contains SSL client
+Validate the `client.crt` contains TLS client attribute
 
 ```
 $ openssl x509 -in client.crt -noout -purpose | grep 'SSL client :'
